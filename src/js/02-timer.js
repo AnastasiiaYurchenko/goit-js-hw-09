@@ -3,6 +3,7 @@
 import flatpickr from "flatpickr";
 // Додатковий імпорт стилів
 import "flatpickr/dist/flatpickr.min.css";
+import Notiflix from 'notiflix';
 
 const inputDateTimePicker = document.querySelector('input[type = "text"]');
 const startBtn = document.querySelector("button[data-start]");
@@ -11,6 +12,7 @@ const fieldsEl = document.querySelectorAll(".field");
 const valuesEl = document.querySelectorAll(".value");
 const labelsEl = document.querySelectorAll(".label");
 
+startBtn.disabled = true;
 timerEl.style.display = "flex";
 timerEl.style.gap = "20px";
 fieldsEl.forEach(field => {
@@ -49,6 +51,10 @@ function convertMs(ms) {
 // console.log(convertMs(140000)); // {days: 0, hours: 0, minutes: 2, seconds: 20}
 // console.log(convertMs(24140000)); // {days: 0, hours: 6 minutes: 42, seconds: 20}
 
+function addLeadingZero(value) {
+  return String(value).padStart(2, '0')
+};
+
 const options = {
   enableTime: true,
   time_24hr: true,
@@ -61,14 +67,32 @@ const options = {
     const nowDate = Date.now();
     console.log(nowDate);
     const deltaDates = countDownDate - nowDate;
-console.log(deltaDates);
+    console.log(deltaDates);
+    if (countDownDate > nowDate) {
+      startBtn.disabled = false;
+    } else {
+      Notiflix.Notify.warning('Please choose a date in the future')
+      // window.alert("Please choose a date in the future");
+    }
+    
   },
 };
+
+// let intervalId = setInterval(convertMs(deltaDates), 1000);
+// console.log(intervalId);
+
+function convertMs(deltaDates) {
+      console.log(convertMs(deltaDates))
+      // valuesEl.forEach(value => {
+      //   value.textContent = 
+      // } )
+    }
 
 flatpickr(inputDateTimePicker, options);
 
 const onStartBtnClick = () => {
-    console.log("onStartBtnClick");
+  console.log("onStartBtnClick");
+  
 };
 
 // const countDownDate = options.defaultDate.getTime();

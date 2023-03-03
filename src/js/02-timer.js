@@ -5,14 +5,17 @@ import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 import Notiflix from 'notiflix';
 
-const inputDateTimePicker = document.querySelector('input[type = "text"]');
+const inputDateTimePicker = document.querySelector('#datetime-picker');
 const startBtn = document.querySelector("button[data-start]");
+const daysEl = document.querySelector("span[data-days]");
+const hoursEl = document.querySelector("span[data-hours]");
+const minutesEl = document.querySelector("span[data-minutes]");
+const secondsEl = document.querySelector("span[data-seconds]");
 const timerEl = document.querySelector(".timer");
 const fieldsEl = document.querySelectorAll(".field");
 const valuesEl = document.querySelectorAll(".value");
 const labelsEl = document.querySelectorAll(".label");
 
-startBtn.disabled = true;
 timerEl.style.display = "flex";
 timerEl.style.gap = "20px";
 fieldsEl.forEach(field => {
@@ -28,25 +31,42 @@ labelsEl.forEach(label => {
     label.style.textTransform = "uppercase";
 });
 
-function convertMs(ms) {
-  // Number of milliseconds per unit of time
+startBtn.disabled = true;
+let timeToCount; 
+
+const options = {
+  enableTime: true,
+  time_24hr: true,
+  defaultDate: new Date(),
+  minuteIncrement: 1,
+  onClose(selectedDates) {
+    // console.log(selectedDates[0]);
+    timeToCount = selectedDates[0] - new Date();
+    console.log(timeToCount);
+    if (selectedDates[0] > new Date()) {
+      startBtn.disabled = false;
+    } else {
+      Notiflix.Notify.warning('Please choose a date in the future');
+      // window.alert("Please choose a date in the future");
+    }
+  },
+};
+
+flatpickr(inputDateTimePicker, options);
+
+function convertMs(ms) { // ms - Number of milliseconds per unit of time
   const second = 1000;
   const minute = second * 60;
   const hour = minute * 60;
   const day = hour * 24;
 
-  // Remaining days
-  const days = Math.floor(ms / day);
-  // Remaining hours
-  const hours = Math.floor((ms % day) / hour);
-  // Remaining minutes
-  const minutes = Math.floor(((ms % day) % hour) / minute);
-  // Remaining seconds
-  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
+  const days = Math.floor(ms / day); // Remaining days
+  const hours = Math.floor((ms % day) / hour); // Remaining hours
+  const minutes = Math.floor(((ms % day) % hour) / minute); // Remaining minutes
+  const seconds = Math.floor((((ms % day) % hour) % minute) / second);  // Remaining seconds
 
   return { days, hours, minutes, seconds };
-}
-
+};
 // console.log(convertMs(2000)); // {days: 0, hours: 0, minutes: 0, seconds: 2}
 // console.log(convertMs(140000)); // {days: 0, hours: 0, minutes: 2, seconds: 20}
 // console.log(convertMs(24140000)); // {days: 0, hours: 6 minutes: 42, seconds: 20}
@@ -55,52 +75,22 @@ function addLeadingZero(value) {
   return String(value).padStart(2, '0')
 };
 
-const options = {
-  enableTime: true,
-  time_24hr: true,
-  defaultDate: new Date(),
-  minuteIncrement: 1,
-  onClose(selectedDates) {
-    console.log(selectedDates[0]);
-    const countDownDate = selectedDates[0].getTime();
-    console.log(countDownDate);
-    const nowDate = Date.now();
-    console.log(nowDate);
-    const deltaDates = countDownDate - nowDate;
-    console.log(deltaDates);
-    if (countDownDate > nowDate) {
-      startBtn.disabled = false;
-    } else {
-      Notiflix.Notify.warning('Please choose a date in the future')
-      // window.alert("Please choose a date in the future");
-    }
-    
-  },
-};
-
-// let intervalId = setInterval(convertMs(deltaDates), 1000);
-// console.log(intervalId);
-
-function convertMs(deltaDates) {
-      console.log(convertMs(deltaDates))
-      // valuesEl.forEach(value => {
-      //   value.textContent = 
-      // } )
-    }
-
-flatpickr(inputDateTimePicker, options);
-
 const onStartBtnClick = () => {
+  startBtn.disabled = true;
   console.log("onStartBtnClick");
-  
-};
-
-// const countDownDate = options.defaultDate.getTime();
-// console.log(countDownDate);
-// const nowDate = Date.now();
-// console.log(nowDate);
-// const deltaDates = countDownDate - nowDate;
-// console.log(deltaDates);
+  let objectOfTime = convertMs(timeToCount);
+  let intervalId = setInterval(() => {
+    console.log("Change time")
+    if (timeToCount > 0) {
+    daysEl.textContent = objectOfTime.days;
+    hoursEl.textContent = addLeadingZero(objectOfTime.hours);
+    minutesEl.textContent = addLeadingZero(objectOfTime.minutes);
+    secondsEl.textContent = addLeadingZero(objectOfTime.seconds);
+    } else {
+      clearInterval(intervalId);
+    }
+  }, 1000);
+  };
 
 startBtn.addEventListener("click", onStartBtnClick);
 

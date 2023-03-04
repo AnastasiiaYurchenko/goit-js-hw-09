@@ -32,6 +32,7 @@ labelsEl.forEach(label => {
 });
 
 startBtn.disabled = true;
+inputDateTimePicker.disabled = false;
 let timeToCount; 
 
 const options = {
@@ -40,9 +41,7 @@ const options = {
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose(selectedDates) {
-    // console.log(selectedDates[0]);
-    timeToCount = selectedDates[0] - new Date();
-    console.log(timeToCount);
+    // console.log(selectedDates[0]); selectedDates - це масив обраних дат, тому ми беремо перший елемент
     if (selectedDates[0] > new Date()) {
       startBtn.disabled = false;
     } else {
@@ -76,11 +75,15 @@ function addLeadingZero(value) {
 };
 
 const onStartBtnClick = () => {
+  inputDateTimePicker.disabled = true;
   startBtn.disabled = true;
   console.log("onStartBtnClick");
-  let objectOfTime = convertMs(timeToCount);
   let intervalId = setInterval(() => {
-    console.log("Change time")
+    const currentTime = Date.now();
+    let selectedDate = new Date(inputDateTimePicker.value).getTime();
+    timeToCount = selectedDate - currentTime;
+    let objectOfTime = convertMs(timeToCount);
+    // console.log("Change time");
     if (timeToCount > 0) {
     daysEl.textContent = objectOfTime.days;
     hoursEl.textContent = addLeadingZero(objectOfTime.hours);
@@ -88,6 +91,7 @@ const onStartBtnClick = () => {
     secondsEl.textContent = addLeadingZero(objectOfTime.seconds);
     } else {
       clearInterval(intervalId);
+      inputDateTimePicker.disabled = false;
     }
   }, 1000);
   };
